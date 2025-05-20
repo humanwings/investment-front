@@ -58,6 +58,7 @@ import { validUsername } from '@/utils/validate'
 export default {
   name: 'Login',
   data() {
+    // elementUI 使用 async-validator来进行表单验证，此处为自定义校验规则
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
         callback(new Error('Please enter the correct user name'))
@@ -77,6 +78,7 @@ export default {
         username: 'admin',
         password: '111111'
       },
+      // elementUI 使用 async-validator来进行表单验证，此处为向:rules传入的约定的验证规则
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
@@ -89,7 +91,9 @@ export default {
   watch: {
     $route: {
       handler: function(route) {
+        console.log("----------views/login/index.vue/watch:$route:handler start ----------")
         this.redirect = route.query && route.query.redirect
+        console.log("this.redirect: " + this.redirect)
       },
       immediate: true
     }
@@ -106,6 +110,7 @@ export default {
       })
     },
     handleLogin() {
+      console.log("----------views/login/index.vue/handleLogin start  ----------")
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true

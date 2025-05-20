@@ -14,9 +14,11 @@ const state = getDefaultState()
 
 const mutations = {
   RESET_STATE: (state) => {
+    console.log("----------store/modules/user.js/mutations/RESET_STATE start ----------")
     Object.assign(state, getDefaultState())
   },
   SET_TOKEN: (state, token) => {
+    console.log("----------store/modules/user.js/mutations/SET_TOKEN start ----------")
     state.token = token
   },
   SET_NAME: (state, name) => {
@@ -54,9 +56,12 @@ const actions = {
         }
 
         const { name, avatar } = data
+        // console.log("avatar: " + avatar)
+        // console.log("full avatar: " + process.env.VUE_APP_BASE_API)
 
         commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
+        // commit('SET_AVATAR', avatar)
+        commit('SET_AVATAR', avatar.startsWith("/")?process.env.VUE_APP_BASE_API + avatar : avatar)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -66,6 +71,7 @@ const actions = {
 
   // user logout
   logout({ commit, state }) {
+    console.log("----------store/modules/user.js/actions/logout start ----------")
     return new Promise((resolve, reject) => {
       logout(state.token).then(() => {
         removeToken() // must remove  token  first
@@ -80,6 +86,7 @@ const actions = {
 
   // remove token
   resetToken({ commit }) {
+    console.log("----------store/modules/user.js/actions/resetToken start ----------")
     return new Promise(resolve => {
       removeToken() // must remove  token  first
       commit('RESET_STATE')

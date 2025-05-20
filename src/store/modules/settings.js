@@ -1,5 +1,6 @@
 import defaultSettings from '@/settings'
 
+console.log("----------store/modules/settings.js start ----------")
 const { showSettings, fixedHeader, sidebarLogo } = defaultSettings
 
 const state = {

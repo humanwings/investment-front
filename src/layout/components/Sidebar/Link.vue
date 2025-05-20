@@ -12,7 +12,8 @@ export default {
     to: {
       type: String,
       required: true
-    }
+    },
+    param1:String
   },
   computed: {
     isExternal() {
@@ -34,8 +35,9 @@ export default {
           rel: 'noopener'
         }
       }
+      var link = to.replace(":msg", this.param1)
       return {
-        to: to
+        to: link
       }
     }
   }

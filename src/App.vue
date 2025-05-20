@@ -5,6 +5,7 @@
 </template>
 
 <script>
+console.log("----------App.vue start ----------")
 export default {
   name: 'App'
 }

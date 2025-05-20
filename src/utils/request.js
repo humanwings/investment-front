@@ -14,7 +14,6 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // do something before request is sent
-
     if (store.getters.token) {
       // let each request carry token
       // ['X-Token'] is a custom headers key
@@ -49,10 +48,11 @@ service.interceptors.response.use(
     if (res.code !== 20000) {
       Message({
         message: res.message || 'Error',
+        // message: 'sfsfsdfsfsfs',
         type: 'error',
         duration: 5 * 1000
       })
-
+      console.log(res)
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
         // to re-login
@@ -72,7 +72,7 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
+    console.log(error) // for debug
     Message({
       message: error.message,
       type: 'error',
@@ -81,5 +81,19 @@ service.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+
+String.prototype.restfulFormat = function(replacements) {
+	var formatString = function (str, replacements) {
+		replacements = (typeof replacements === 'object') ? replacements : Array.prototype.slice.call(arguments, 1);
+		return str.replace(/\{\{|\}\}|\{(\w+)\}/g, function(m, n) {
+			if (m == '{{') { return '{'; }
+			if (m == '}}') { return '}'; }
+			return replacements[n];
+		});
+	};
+    replacements = (typeof replacements === 'object') ? replacements : Array.prototype.slice.call(arguments, 0);
+    return formatString(this, replacements);
+}
 
 export default service

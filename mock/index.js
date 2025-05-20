@@ -3,10 +3,16 @@ const { param2Obj } = require('./utils')
 
 const user = require('./user')
 const table = require('./table')
+const article = require('./article')
+const lixinger = require('./lixinger')
+const strategy = require('./strategy')
 
 const mocks = [
   ...user,
-  ...table
+  ...table,
+  ...article,
+  ...lixinger,
+  ...strategy
 ]
 
 // for front mock
@@ -46,6 +52,7 @@ function mockXHR() {
   }
 
   for (const i of mocks) {
+    console.log("mock url : " +  i.url)
     Mock.mock(new RegExp(i.url), i.type || 'get', XHR2ExpressReqWrap(i.response))
   }
 }

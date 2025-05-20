@@ -1,7 +1,8 @@
 <template>
   <div v-if="!item.hidden">
     <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow">
-      <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path)">
+      <!--<app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path)"> -->
+      <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path)" :param1="resolveParam(item)">
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{'submenu-title-noDropdown':!isNest}">
           <item :icon="onlyOneChild.meta.icon||(item.meta&&item.meta.icon)" :title="onlyOneChild.meta.title" />
         </el-menu-item>
@@ -85,10 +86,20 @@ export default {
       if (isExternal(routePath)) {
         return routePath
       }
+
       if (isExternal(this.basePath)) {
         return this.basePath
       }
+      // var p = path.resolve(this.basePath, routePath)
+      // console.log("----------------- resolvePath-------------------result：" + p)
       return path.resolve(this.basePath, routePath)
+    },
+    // add by wujian for pass param to dami component
+    resolveParam(item) {
+      if (item.meta && item.meta.param1){
+        return item.meta.param1
+      }
+      return ""
     }
   }
 }

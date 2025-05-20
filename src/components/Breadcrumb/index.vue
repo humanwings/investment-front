@@ -20,6 +20,7 @@ export default {
   },
   watch: {
     $route() {
+      console.log("---------------------Breadcrumb/index.vue:watch-------------------")
       this.getBreadcrumb()
     }
   },

@@ -115,3 +115,23 @@ export function param2Obj(url) {
   })
   return obj
 }
+
+export function formatPercent(num){
+  return (num !== null)?(num * 100).toFixed(2) + '%':"";
+}
+
+export function formatYi(num){
+  return num?(num / 100000000).toFixed(2) + '亿':"";
+}
+
+export function formatWan(num){
+  return num?(num / 10000).toFixed(2) + '万':"";
+}
+
+export function roundToDecimal(number, decimalPlaces) {
+  var factor = Math.pow(10, decimalPlaces);
+  var tempNumber = number * factor;
+  var roundedTempNumber = Math.round(tempNumber);
+  return roundedTempNumber / factor;
+}
+

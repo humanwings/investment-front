@@ -15,6 +15,8 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // permission control
 
+
+console.log("----------main.js start ----------")
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -41,3 +43,18 @@ new Vue({
   store,
   render: h => h(App)
 })
+console.log("----------main.js end ----------")
+
+// import axios from 'axios'
+
+// console.log(axios.defaults.baseURL)
+// axios.defaults.baseURL = "http://localhost:8080"
+
+
+// axios.get("/test").then(function(response){
+//   console.log("----------axios success ----------")
+//   console.log(response)
+// }).catch(function(error){
+//   console.log("----------axios failure ----------")
+//   console.log(error)
+// })

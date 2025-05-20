@@ -6,11 +6,17 @@ import 'nprogress/nprogress.css' // progress bar style
 import { getToken } from '@/utils/auth' // get token from cookie
 import getPageTitle from '@/utils/get-page-title'
 
+console.log("----------permission.js start ----------")
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 const whiteList = ['/login'] // no redirect whitelist
 
 router.beforeEach(async(to, from, next) => {
+
+  console.log("----------permission.js/beforeEach start  ----------")
+
+  console.log("from: " + from.fullPath + "  to: " + to.fullPath)
+
   // start progress bar
   NProgress.start()
 
@@ -37,6 +43,7 @@ router.beforeEach(async(to, from, next) => {
           next()
         } catch (error) {
           // remove token and go to login page to re-login
+          console.log(error)
           await store.dispatch('user/resetToken')
           Message.error(error || 'Has Error')
           next(`/login?redirect=${to.path}`)

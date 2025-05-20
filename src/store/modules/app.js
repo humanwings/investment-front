@@ -1,5 +1,7 @@
 import Cookies from 'js-cookie'
 
+console.log("----------store/modules/app.js start ----------")
+
 const state = {
   sidebar: {
     opened: Cookies.get('sidebarStatus') ? !!+Cookies.get('sidebarStatus') : true,
