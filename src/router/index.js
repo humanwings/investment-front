@@ -188,13 +188,13 @@ export const constantRoutes = [
         children: [
           {
             path: 'macrosettings',
-            component: () => import('@/views/valuation/companylist'),
+            component: () => import('@/views/valuation/macrosettings'),
             name: 'macrosettings',
             meta: { title: '宏观参数' }
           },
           {
             path: 'industrysettings',
-            component: () => import('@/views/valuation/companylist'),
+            component: () => import('@/views/valuation/industries-settings'),
             name: 'industrysettings',
             meta: { title: '行业参数' }
           }
