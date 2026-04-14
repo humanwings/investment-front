@@ -1,99 +1,103 @@
-# vue-admin-template
+# investment-front
 
-English | [简体中文](./README-zh.md)
+Frontend project for the investment system.
 
-> A minimal vue admin template with Element UI & axios & iconfont & permission control & lint
+## Startup
 
-**Live demo:** http://panjiachen.github.io/vue-admin-template
+### Requirements
 
+- Node.js
+- npm
 
-**The current version is `v4.0+` build on `vue-cli`. If you want to use the old version , you can switch branch to [tag/3.11.0](https://github.com/PanJiaChen/vue-admin-template/tree/tag/3.11.0), it does not rely on `vue-cli`**
+Recommended:
 
-<p align="center">
-  <b>SPONSORED BY</b>
-</p>
-<p align="center">
-   <a href="https://finclip.com?from=vue_element" title="FinClip" target="_blank">
-      <img height="200px" src="https://gitee.com/panjiachen/gitee-cdn/raw/master/vue%E8%B5%9E%E5%8A%A9.png" title="FinClip">
-   </a>
-</p>
+- Node.js 16.x
+- npm 8.x or later
 
-## Build Setup
+### Install Dependencies
 
 ```bash
-# clone the project
-git clone https://github.com/PanJiaChen/vue-admin-template.git
-
-# enter the project directory
-cd vue-admin-template
-
-# install dependency
 npm install
+```
 
-# develop
+## Run
+
+### Development
+
+```bash
 npm run dev
 ```
 
-This will automatically open http://localhost:9528
+Default local address:
 
-## Build
+- `http://localhost:9528`
+
+Current development API base URL is configured in `.env.development`:
+
+- `VUE_APP_BASE_API=http://localhost:8080`
+
+Make sure the backend service is running before starting frontend development.
+
+### Production Build
 
 ```bash
-# build for test environment
-npm run build:stage
-
-# build for production environment
 npm run build:prod
 ```
 
-## Advanced
+Build output directory:
+
+- `dist/`
+
+### Staging Build
 
 ```bash
-# preview the release environment effect
-npm run preview
-
-# preview the release environment effect + static resource analysis
-npm run preview -- --report
-
-# code format check
-npm run lint
-
-# code format check and auto fix
-npm run lint -- --fix
+npm run build:stage
 ```
 
-Refer to [Documentation](https://panjiachen.github.io/vue-element-admin-site/guide/essentials/deploy.html) for more information
+### Preview Build
 
-## Demo
+```bash
+npm run preview
+```
 
-![demo](https://github.com/PanJiaChen/PanJiaChen.github.io/blob/master/images/demo.gif)
+### Lint
 
-## Extra
+```bash
+npm run lint
+```
 
-If you want router permission && generate menu by user roles , you can use this branch [permission-control](https://github.com/PanJiaChen/vue-admin-template/tree/permission-control)
+## Technical Implementation
 
-For `typescript` version, you can use [vue-typescript-admin-template](https://github.com/Armour/vue-typescript-admin-template) (Credits: [@Armour](https://github.com/Armour))
+### Core Stack
 
-## Related Project
+- Vue 2
+- Vue Router
+- Vuex
+- Element UI
+- Axios
+- SCSS
 
-- [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
+### Project Structure
 
-- [electron-vue-admin](https://github.com/PanJiaChen/electron-vue-admin)
+- `src/views/`
+  UI pages
+- `src/router/`
+  route configuration
+- `src/store/`
+  Vuex store
+- `src/api/`
+  frontend API wrappers
+- `src/layout/`
+  layout shell and sidebar/navbar structure
+- `src/components/`
+  shared components
+- `src/utils/`
+  common utilities
 
-- [vue-typescript-admin-template](https://github.com/Armour/vue-typescript-admin-template)
+### Runtime Behavior
 
-- [awesome-project](https://github.com/PanJiaChen/vue-element-admin/issues/2312)
+- Frontend and backend communicate through HTTP APIs
+- Authentication state is managed with Vuex and token storage
+- Sidebar menus are driven by router configuration
+- Environment-specific API addresses are controlled by `.env.*`
 
-## Browsers support
-
-Modern browsers and Internet Explorer 10+.
-
-| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>IE / Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Safari |
-| --------- | --------- | --------- | --------- |
-| IE10, IE11, Edge| last 2 versions| last 2 versions| last 2 versions
-
-## License
-
-[MIT](https://github.com/PanJiaChen/vue-admin-template/blob/master/LICENSE) license.
-
-Copyright (c) 2017-present PanJiaChen
