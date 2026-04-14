@@ -174,9 +174,16 @@ export const constantRoutes = [
           },
           {
             path: 'recommend',
-            component: () => import('@/views/valuation/companylist'),
-            name: 'recommend',
+            component: () => import('@/views/recommend/rank'),
+            name: 'recommendrank',
             meta: { title: '大V推荐' }
+          },
+          {
+            path: 'recommend/:stockCode',
+            component: () => import('@/views/recommend/detail'),
+            name: 'recommenddetail',
+            hidden: true,
+            meta: { title: '推荐详情' }
           }
         ]
       },
@@ -197,6 +204,18 @@ export const constantRoutes = [
             component: () => import('@/views/valuation/industrysettings'),
             name: 'industrysettings',
             meta: { title: '行业参数' }
+          },
+          {
+            path: 'recommendauthors',
+            component: () => import('@/views/settings/kvmanage'),
+            name: 'recommendauthors',
+            meta: { title: '大V管理' }
+          },
+          {
+            path: 'recommendrules',
+            component: () => import('@/views/settings/kvrules'),
+            name: 'recommendrules',
+            meta: { title: '推荐权重规则' }
           }
         ]
       }
