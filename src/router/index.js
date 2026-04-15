@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-console.log("----------router/index.js start ----------")
+console.log('----------router/index.js start ----------')
 Vue.use(Router)
 
 /* Layout */
@@ -59,7 +59,7 @@ export const constantRoutes = [
   {
     path: '/barginhunting',
     component: Layout,
-    //redirect: '/Barginhunting/analyte',
+    // redirect: '/Barginhunting/analyte',
     name: 'Barginhunting',
     meta: { title: 'Bargin Hunting', icon: 'el-icon-s-help' },
     children: [
@@ -137,26 +137,32 @@ export const constantRoutes = [
         path: '/valuation',
         name: 'valuation',
         component: () => import('@/views/dami'),
-        meta: { title: '公司估值' },
+        meta: { title: 'Company Valuation' },
         children: [
           {
             path: 'company',
             component: () => import('@/views/valuation/companylist'),
             name: 'company',
-            meta: { title: '公司估值' }
+            meta: { title: '公司列表' }
+          },
+          {
+            path: 'profit-discount',
+            component: () => import('@/views/valuation/profitdiscountlist'),
+            name: 'profitdiscountlist',
+            meta: { title: '利润贴现一览' }
           },
           {
             path: 'company/:id',
             component: () => import('@/views/valuation/companydetail'),
             name: 'companydetail',
             hidden: true,
-            meta: { title: '公司详细信息' }
+            meta: { title: '公司总览' }
           },
           {
             path: 'recommend',
             component: () => import('@/views/recommend/rank'),
             name: 'recommendrank',
-            meta: { title: '大V推荐' }
+            meta: { title: '大V推荐排行' }
           },
           {
             path: 'recommend/:stockCode',
