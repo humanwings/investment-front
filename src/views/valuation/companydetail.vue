@@ -219,6 +219,26 @@
               </div>
             </el-card>
 
+            <el-card shadow="never" class="section-card tone-financial">
+              <div slot="header" class="card-header">
+                <span>财务诊断</span>
+                <span class="card-tip">把快照指标转成研究判断</span>
+              </div>
+              <div class="diagnostic-grid">
+                <div
+                  v-for="item in financialDiagnostics"
+                  :key="item.label"
+                  class="diagnostic-item"
+                >
+                  <div class="summary-label">{{ item.label }}</div>
+                  <el-tag :type="item.type" effect="dark">{{ displayValue(item.value) }}</el-tag>
+                </div>
+              </div>
+              <div class="boundary-note">
+                {{ displayValue(financialReview && financialReview.dataBoundaryNote) }}
+              </div>
+            </el-card>
+
             <el-card shadow="never" class="section-card tone-cashflow">
               <div slot="header" class="card-header">
                 <span>盈利与现金流</span>
@@ -231,6 +251,8 @@
                 <el-descriptions-item label="每股经营现金流">{{ numberValue(financialReport.operatingCashFlowPer) }}</el-descriptions-item>
                 <el-descriptions-item label="每股自由现金流">{{ numberValue(financialReport.freeCashFlowPer) }}</el-descriptions-item>
                 <el-descriptions-item label="毛利率">{{ formatPercentValue(financialReport.grossMargin) }}</el-descriptions-item>
+                <el-descriptions-item label="经营现金覆盖">{{ formatPercentValue(financialReview && financialReview.operatingCashFlowCoverage) }}</el-descriptions-item>
+                <el-descriptions-item label="自由现金转化">{{ formatPercentValue(financialReview && financialReview.freeCashFlowConversion) }}</el-descriptions-item>
               </el-descriptions>
             </el-card>
 
@@ -247,6 +269,49 @@
                 <el-descriptions-item label="资产负债率">{{ formatPercentValue(financialReport.assetLiabilityRatio) }}</el-descriptions-item>
                 <el-descriptions-item label="有息负债率">{{ formatPercentValue(financialReport.interestLiabilityRatio) }}</el-descriptions-item>
               </el-descriptions>
+            </el-card>
+
+            <el-card shadow="never" class="section-card tone-guide">
+              <div slot="header" class="card-header">
+                <span>后续 DCF 准备</span>
+                <span class="card-tip">第 6 步先把快照层单独站稳</span>
+              </div>
+              <div class="action-panel">
+                <p class="action-copy">{{ displayValue(financialReview && financialReview.dcfReadiness) }}</p>
+                <div class="summary-grid compact-summary-grid readiness-grid">
+                  <div class="summary-item">
+                    <div class="summary-label">快照层</div>
+                    <div class="summary-value">{{ displayBoolean(financialReview && financialReview.snapshotLayerReady) }}</div>
+                  </div>
+                  <div class="summary-item">
+                    <div class="summary-label">历史层</div>
+                    <div class="summary-value">{{ displayBoolean(financialReview && financialReview.historyLayerReady) }}</div>
+                  </div>
+                </div>
+              </div>
+            </el-card>
+
+            <el-card shadow="never" class="section-card tone-dividend">
+              <div slot="header" class="card-header">
+                <span>风险与亮点</span>
+                <span class="card-tip">为后续风险告警做准备</span>
+              </div>
+              <div class="signal-columns">
+                <div class="signal-block">
+                  <div class="insight-label">亮点</div>
+                  <ul v-if="financialReview && financialReview.strengths && financialReview.strengths.length" class="signal-list">
+                    <li v-for="item in financialReview.strengths" :key="item">{{ item }}</li>
+                  </ul>
+                  <p v-else class="action-copy">当前快照下暂无明显亮点。</p>
+                </div>
+                <div class="signal-block">
+                  <div class="insight-label">风险</div>
+                  <ul v-if="financialReview && financialReview.risks && financialReview.risks.length" class="signal-list">
+                    <li v-for="item in financialReview.risks" :key="item">{{ item }}</li>
+                  </ul>
+                  <p v-else class="action-copy">当前快照下暂无明显风险提示。</p>
+                </div>
+              </div>
             </el-card>
           </div>
         </el-tab-pane>
@@ -304,6 +369,7 @@
 
 <script>
 import { getCompany } from '@/api/company'
+import { getFinancialReview } from '@/api/financialReview'
 import { formatPercent, formatYi, roundToDecimal } from '@/utils/index'
 
 export default {
@@ -316,6 +382,7 @@ export default {
       company: null,
       valuation: null,
       financialReport: null,
+      financialReview: null,
       dividendList: [],
       valuationData: null
     }
@@ -418,12 +485,23 @@ export default {
         return []
       }
       return [
-        { label: '财务评分', value: this.displayValue(this.valuation.financialScore) },
-        { label: '加权ROE', value: this.formatPercentValue(this.financialReport.wroe) },
-        { label: '每股自由现金流', value: this.numberValue(this.financialReport.freeCashFlowPer) },
-        { label: '毛利率', value: this.formatPercentValue(this.financialReport.grossMargin) },
-        { label: '资产负债率', value: this.formatPercentValue(this.financialReport.assetLiabilityRatio) },
-        { label: '有息负债率', value: this.formatPercentValue(this.financialReport.interestLiabilityRatio) }
+        { label: '财务评分', value: this.displayValue(this.financialReview && this.financialReview.financialScore) },
+        { label: '报告期', value: this.displayValue(this.financialReview && this.financialReview.reportDate) },
+        { label: '经营现金覆盖', value: this.formatPercentValue(this.financialReview && this.financialReview.operatingCashFlowCoverage) },
+        { label: '自由现金转化', value: this.formatPercentValue(this.financialReview && this.financialReview.freeCashFlowConversion) },
+        { label: '盈利诊断', value: this.displayValue(this.financialReview && this.financialReview.profitabilityTag) },
+        { label: 'DCF 准备度', value: this.displayValue(this.financialReview && this.financialReview.dcfReadiness) }
+      ]
+    },
+    financialDiagnostics() {
+      if (!this.financialReview) {
+        return []
+      }
+      return [
+        { label: '盈利质量', value: this.financialReview.profitabilityTag, type: this.tagType(this.financialReview.profitabilityTag) },
+        { label: '现金流质量', value: this.financialReview.cashFlowTag, type: this.tagType(this.financialReview.cashFlowTag) },
+        { label: '杠杆结构', value: this.financialReview.leverageTag, type: this.tagType(this.financialReview.leverageTag) },
+        { label: '增长势能', value: this.financialReview.growthTag, type: this.tagType(this.financialReview.growthTag) }
       ]
     },
     recommendSummaryItems() {
@@ -447,10 +525,15 @@ export default {
     async getDetail() {
       this.listLoading = true
       try {
-        const { data } = await getCompany(this.companyId)
+        const [detailResponse, financialReviewResponse] = await Promise.all([
+          getCompany(this.companyId),
+          getFinancialReview(this.companyId)
+        ])
+        const data = detailResponse.data
         this.company = data.company || null
         this.valuation = data.valuation || null
         this.financialReport = data.financialReport || null
+        this.financialReview = financialReviewResponse.data.financialReview || null
         this.dividendList = data.dividendList || []
         this.valuationData = data.valuationData || null
         if (this.valuationData) {
@@ -485,6 +568,24 @@ export default {
         return '-'
       }
       return formatYi(value)
+    },
+    displayBoolean(value) {
+      if (value === null || value === undefined) {
+        return '-'
+      }
+      return value ? '已就绪' : '未就绪'
+    },
+    tagType(value) {
+      if (!value) {
+        return 'info'
+      }
+      if (value.includes('强') || value.includes('稳') || value.includes('低')) {
+        return 'success'
+      }
+      if (value.includes('一般') || value.includes('可控')) {
+        return 'warning'
+      }
+      return 'danger'
     },
     goRecommendDetail() {
       if (!this.company || !this.company.stockCode) {
@@ -703,6 +804,43 @@ export default {
   margin: 0;
   color: var(--text-subtle);
   line-height: 1.7;
+}
+
+.diagnostic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.diagnostic-item,
+.signal-block {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.boundary-note {
+  margin-top: 14px;
+  color: var(--text-subtle);
+  line-height: 1.7;
+}
+
+.readiness-grid {
+  margin-top: 14px;
+}
+
+.signal-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.signal-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-subtle);
+  line-height: 1.8;
 }
 
 .action-row {

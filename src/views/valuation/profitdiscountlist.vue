@@ -35,6 +35,33 @@
       </div>
     </el-card>
 
+    <el-card shadow="never" class="filter-card">
+      <div class="filter-bar batch-bar">
+        <div class="filter-item">
+          <span class="filter-label">批量增长率</span>
+          <el-input-number
+            v-model="batchGrowthRate"
+            :precision="0"
+            :controls="false"
+            size="small"
+            class="growth-input"
+          />
+        </div>
+        <div class="page-actions">
+          <el-button
+            type="primary"
+            :disabled="!selectedIndustry || batchGrowthRate === null || batchGrowthRate === undefined"
+            @click="applyIndustryGrowthRate"
+          >
+            按行业批量设置
+          </el-button>
+          <el-button :disabled="!selectedIndustry" @click="resetIndustryGrowthRate">
+            恢复该行业默认值
+          </el-button>
+        </div>
+      </div>
+    </el-card>
+
     <el-table
       :data="filteredList"
       border
@@ -98,11 +125,16 @@
         </template>
       </el-table-column>
 
-      <el-table-column fixed="right" align="center" label="操作" width="110">
+      <el-table-column fixed="right" align="center" label="操作" width="180">
         <template slot-scope="{ row }">
-          <el-button size="mini" type="primary" @click="goToDetail(row)">
-            查看详情
-          </el-button>
+          <div class="row-actions">
+            <el-button size="mini" @click="resetRowGrowthRate(row)">
+              恢复默认
+            </el-button>
+            <el-button size="mini" type="primary" @click="goToDetail(row)">
+              查看详情
+            </el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -110,7 +142,12 @@
 </template>
 
 <script>
-import { getCompanyList, updateGrowthRate } from '@/api/company'
+import {
+  batchUpdateProfitDiscountGrowthRate,
+  getProfitDiscountList,
+  resetProfitDiscountGrowthRate,
+  updateProfitDiscountGrowthRate
+} from '@/api/profitDiscount'
 import { formatPercent, roundToDecimal } from '@/utils/index'
 
 export default {
@@ -121,8 +158,13 @@ export default {
       total: 0,
       listLoading: true,
       selectedIndustry: '',
+      batchGrowthRate: null,
       temp: {
         companyId: undefined,
+        growthRateAssumption: undefined
+      },
+      batchTemp: {
+        industryName: '',
         growthRateAssumption: undefined
       }
     }
@@ -145,7 +187,7 @@ export default {
     async getList() {
       this.listLoading = true
       try {
-        const { data } = await getCompanyList()
+        const { data } = await getProfitDiscountList()
         this.list = (data.list || []).map(item => this.normalizeRow(item))
         this.total = data.sum || 0
       } finally {
@@ -203,20 +245,64 @@ export default {
     changeGrowthRate(row, value) {
       this.temp.companyId = row.companyId
       this.temp.growthRateAssumption = value
-      updateGrowthRate(this.temp).then(response => {
-        const targetIndex = this.list.findIndex(item => item.companyId === row.companyId)
-        if (targetIndex !== -1) {
-          this.list.splice(targetIndex, 1, this.normalizeRow(response.data.companyInfo))
-        }
+      updateProfitDiscountGrowthRate(this.temp).then(response => {
+        this.replaceItem(response.data.item)
         this.$notify({
           title: 'Success',
-          message: 'Update Growth Rate Successfully',
+          message: '更新增长率成功',
           type: 'success',
           duration: 2000
         })
       }).catch(() => {
         row.manualGrowthRateDraft = this.normalizeInteger(row.growthRateAssumption)
       })
+    },
+    replaceItem(item) {
+      const targetIndex = this.list.findIndex(row => row.companyId === item.companyId)
+      if (targetIndex !== -1) {
+        this.list.splice(targetIndex, 1, this.normalizeRow(item))
+      }
+    },
+    replaceIndustryItems(items) {
+      const normalizedItems = (items || []).map(item => this.normalizeRow(item))
+      const itemMap = normalizedItems.reduce((result, item) => {
+        result[item.companyId] = item
+        return result
+      }, {})
+      this.list = this.list.map(item => itemMap[item.companyId] || item)
+    },
+    applyIndustryGrowthRate() {
+      this.batchTemp.industryName = this.selectedIndustry
+      this.batchTemp.growthRateAssumption = this.batchGrowthRate
+      batchUpdateProfitDiscountGrowthRate(this.batchTemp).then(response => {
+        this.replaceIndustryItems(response.data.list)
+        this.$notify({
+          title: 'Success',
+          message: '批量设置增长率成功',
+          type: 'success',
+          duration: 2000
+        })
+      }).catch(() => {
+        this.getList()
+      })
+    },
+    resetIndustryGrowthRate() {
+      this.batchTemp.industryName = this.selectedIndustry
+      resetProfitDiscountGrowthRate(this.batchTemp).then(response => {
+        this.replaceIndustryItems(response.data.list)
+        this.$notify({
+          title: 'Success',
+          message: '已恢复该行业默认增长率',
+          type: 'success',
+          duration: 2000
+        })
+      }).catch(() => {
+        this.getList()
+      })
+    },
+    resetRowGrowthRate(row) {
+      row.manualGrowthRateDraft = null
+      this.changeGrowthRate(row, null)
     },
     goToDetail(row) {
       this.$router.push(`/valuation/company/${row.companyId}`)
@@ -282,6 +368,10 @@ export default {
   color: #909399;
 }
 
+.batch-bar {
+  align-items: center;
+}
+
 .industry-select {
   width: 260px;
 }
@@ -314,6 +404,12 @@ export default {
 .is-negative {
   color: #f56c6c;
   font-weight: 600;
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {
