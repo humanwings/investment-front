@@ -152,6 +152,12 @@ export const constantRoutes = [
             meta: { title: '利润贴现一览' }
           },
           {
+            path: 'dcf',
+            component: () => import('@/views/valuation/dcflist'),
+            name: 'dcflist',
+            meta: { title: 'DCF一览' }
+          },
+          {
             path: 'company/:id',
             component: () => import('@/views/valuation/companydetail'),
             name: 'companydetail',

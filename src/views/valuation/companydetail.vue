@@ -316,6 +316,105 @@
           </div>
         </el-tab-pane>
 
+        <el-tab-pane label="DCF" name="dcf">
+          <div class="section-grid">
+            <el-card shadow="never" class="section-card tone-cashflow">
+              <div slot="header" class="card-header">
+                <span>DCF摘要</span>
+                <span class="card-tip">先看结果，再看参数采用情况</span>
+              </div>
+              <div class="summary-grid compact-summary-grid">
+                <div
+                  v-for="item in dcfSummaryItems"
+                  :key="item.label"
+                  class="summary-item"
+                >
+                  <div class="summary-label">{{ item.label }}</div>
+                  <div class="summary-value">{{ item.value }}</div>
+                </div>
+              </div>
+            </el-card>
+
+            <el-card shadow="never" class="section-card tone-balance">
+              <div slot="header" class="card-header">
+                <span>核心公式</span>
+                <span class="card-tip">当前按每股口径展示</span>
+              </div>
+              <div class="formula-panel">
+                <div class="formula-title">理论公式</div>
+                <div class="formula-line">{{ dcfTheoryFormula }}</div>
+                <div class="formula-title">带入数字</div>
+                <div class="formula-line">{{ dcfFormulaWithNumbers }}</div>
+                <div class="formula-line">{{ dcfFormulaResultLine }}</div>
+              </div>
+            </el-card>
+
+            <el-card shadow="never" class="section-card tone-guide">
+              <div slot="header" class="card-header">
+                <span>参数来源</span>
+                <span class="card-tip">系统值、手动值、采用值已拆开</span>
+              </div>
+              <el-descriptions :column="2" border>
+                <el-descriptions-item label="现金流起点">{{ numberValue(dcfDetail && dcfDetail.baseCashFlowPerShare) }}</el-descriptions-item>
+                <el-descriptions-item label="高增长期年数">{{ displayValue(dcfDetail && dcfDetail.highGrowthYears) }}</el-descriptions-item>
+                <el-descriptions-item label="系统增长率">{{ formatPercentValue(percentPointToRatio(dcfDetail && dcfDetail.systemGrowthRate)) }}</el-descriptions-item>
+                <el-descriptions-item label="手动增长率">{{ formatPercentValue(percentPointToRatio(dcfDetail && dcfDetail.manualGrowthRate)) }}</el-descriptions-item>
+                <el-descriptions-item label="采用增长率">{{ formatPercentValue(percentPointToRatio(dcfDetail && dcfDetail.adoptedGrowthRate)) }}</el-descriptions-item>
+                <el-descriptions-item label="系统折现率">{{ formatPercentValue(dcfDetail && dcfDetail.systemDiscountRate) }}</el-descriptions-item>
+                <el-descriptions-item label="手动折现率">{{ formatPercentValue(dcfDetail && dcfDetail.manualDiscountRate) }}</el-descriptions-item>
+                <el-descriptions-item label="采用折现率">{{ formatPercentValue(dcfDetail && dcfDetail.adoptedDiscountRate) }}</el-descriptions-item>
+                <el-descriptions-item label="系统永续增长率">{{ formatPercentValue(dcfDetail && dcfDetail.systemTerminalGrowthRate) }}</el-descriptions-item>
+                <el-descriptions-item label="手动永续增长率">{{ formatPercentValue(dcfDetail && dcfDetail.manualTerminalGrowthRate) }}</el-descriptions-item>
+                <el-descriptions-item label="采用永续增长率">{{ formatPercentValue(dcfDetail && dcfDetail.adoptedTerminalGrowthRate) }}</el-descriptions-item>
+              </el-descriptions>
+              <div class="boundary-note">
+                手动值为空时回退到系统值；若手动值超出边界，系统会自动修正到可计算区间，实际结果以“采用值”为准。
+              </div>
+            </el-card>
+
+            <el-card shadow="never" class="section-card tone-financial">
+              <div slot="header" class="card-header">
+                <span>折现率推导</span>
+                <span class="card-tip">先按宏观与行业风险做简化调整</span>
+              </div>
+              <div class="formula-panel">
+                <div class="formula-title">推导逻辑</div>
+                <div class="formula-line">{{ dcfDiscountFormula }}</div>
+                <div class="formula-line">{{ dcfDiscountFormulaResult }}</div>
+              </div>
+            </el-card>
+
+            <el-card shadow="never" class="section-card tone-dividend">
+              <div slot="header" class="card-header">
+                <span>计算步骤</span>
+                <span class="card-tip">高增长期 + 永续期</span>
+              </div>
+              <el-table
+                :data="dcfProjectionList"
+                size="mini"
+                border
+                class="dividend-table"
+              >
+                <el-table-column align="center" label="年份" width="80" prop="yearNo" />
+                <el-table-column align="center" label="预测现金流">
+                  <template slot-scope="{ row }">
+                    <span>{{ numberValue(row.projectedCashFlowPerShare) }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column align="center" label="折现后现金流">
+                  <template slot-scope="{ row }">
+                    <span>{{ numberValue(row.discountedCashFlowPerShare) }}</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <div class="boundary-note">
+                永续期终值现值：{{ numberValue(dcfDetail && dcfDetail.terminalValuePresentValue) }}，
+                终值占比：{{ formatPercentValue(dcfDetail && dcfDetail.terminalValueRatio) }}
+              </div>
+            </el-card>
+          </div>
+        </el-tab-pane>
+
         <el-tab-pane label="大V推荐" name="recommend">
           <div class="section-grid">
             <el-card shadow="never" class="section-card tone-recommend">
@@ -369,6 +468,7 @@
 
 <script>
 import { getCompany } from '@/api/company'
+import { getDcfDetail } from '@/api/dcf'
 import { getFinancialReview } from '@/api/financialReview'
 import { formatPercent, formatYi, roundToDecimal } from '@/utils/index'
 
@@ -383,6 +483,7 @@ export default {
       valuation: null,
       financialReport: null,
       financialReview: null,
+      dcfDetail: null,
       dividendList: [],
       valuationData: null
     }
@@ -516,6 +617,50 @@ export default {
         { label: '所属行业', value: this.displayValue(this.company.firstIndustry) },
         { label: '证券代码', value: this.displayValue(this.company.stockCode) }
       ]
+    },
+    dcfSummaryItems() {
+      if (!this.dcfDetail) {
+        return []
+      }
+      return [
+        { label: '当前股价', value: this.displayValue(this.dcfDetail.price) },
+        { label: 'DCF估值', value: this.numberValue(this.dcfDetail.valuation) },
+        { label: '偏离率', value: this.formatPercentValue(this.dcfDetail.deviation) },
+        { label: '与利润贴现差异', value: this.numberValue(this.dcfDetail.profitDiscountGap) },
+        { label: '终值占比', value: this.formatPercentValue(this.dcfDetail.terminalValueRatio) },
+        { label: '现金流起点', value: this.numberValue(this.dcfDetail.baseCashFlowPerShare) }
+      ]
+    },
+    dcfTheoryFormula() {
+      return 'DCF估值 = 高增长期各年折现现金流之和 + 永续期终值的折现现值'
+    },
+    dcfFormulaWithNumbers() {
+      if (!this.dcfDetail) {
+        return '-'
+      }
+      return '= ' + this.numberValue(this.dcfDetail.presentValue) + ' + ' + this.numberValue(this.dcfDetail.terminalValuePresentValue)
+    },
+    dcfFormulaResultLine() {
+      return '= ' + this.numberValue(this.dcfDetail && this.dcfDetail.valuation)
+    },
+    dcfDiscountFormula() {
+      if (!this.dcfDetail) {
+        return '-'
+      }
+      return '系统折现率 = 宏观折现率 ÷ 风险归一化系数，风险系数 = 市场风险 ' +
+        this.displayValue(this.dcfDetail.marketRiskFactor) +
+        ' × 行业风险 ' +
+        this.displayValue(this.dcfDetail.industryRiskFactor)
+    },
+    dcfDiscountFormulaResult() {
+      if (!this.dcfDetail) {
+        return '-'
+      }
+      return '综合风险系数 ' + this.displayValue(this.dcfDetail.combinedRiskFactor) +
+        '，当前采用折现率 ' + this.formatPercentValue(this.dcfDetail.adoptedDiscountRate)
+    },
+    dcfProjectionList() {
+      return this.dcfDetail && this.dcfDetail.projectionYears ? this.dcfDetail.projectionYears : []
     }
   },
   created() {
@@ -525,15 +670,17 @@ export default {
     async getDetail() {
       this.listLoading = true
       try {
-        const [detailResponse, financialReviewResponse] = await Promise.all([
+        const [detailResponse, financialReviewResponse, dcfDetailResponse] = await Promise.all([
           getCompany(this.companyId),
-          getFinancialReview(this.companyId)
+          getFinancialReview(this.companyId),
+          getDcfDetail(this.companyId)
         ])
         const data = detailResponse.data
         this.company = data.company || null
         this.valuation = data.valuation || null
         this.financialReport = data.financialReport || null
         this.financialReview = financialReviewResponse.data.financialReview || null
+        this.dcfDetail = dcfDetailResponse.data.dcfDetail || null
         this.dividendList = data.dividendList || []
         this.valuationData = data.valuationData || null
         if (this.valuationData) {
@@ -556,6 +703,12 @@ export default {
         return '-'
       }
       return formatPercent(value)
+    },
+    percentPointToRatio(value) {
+      if (value === null || value === undefined || value === '') {
+        return null
+      }
+      return Number(value) / 100
     },
     numberValue(value) {
       if (value === null || value === undefined || value === '') {

@@ -9,6 +9,9 @@
         <el-button type="primary" icon="el-icon-data-analysis" @click="$router.push('/valuation/profit-discount')">
           利润贴现一览
         </el-button>
+        <el-button icon="el-icon-pie-chart" @click="$router.push('/valuation/dcf')">
+          DCF一览
+        </el-button>
         <el-button icon="el-icon-plus" @click="showAdd()">
           加入公司
         </el-button>
