@@ -73,27 +73,32 @@ service.interceptors.response.use(
   },
   error => {
     console.log(error) // for debug
+    const responseMessage = error && error.response && error.response.data && error.response.data.message
+    const message = responseMessage || error.message
     Message({
-      message: error.message,
+      message,
       type: 'error',
       duration: 5 * 1000
     })
+    if (responseMessage) {
+      error.message = responseMessage
+    }
     return Promise.reject(error)
   }
 )
 
-
+// eslint-disable-next-line no-extend-native
 String.prototype.restfulFormat = function(replacements) {
-	var formatString = function (str, replacements) {
-		replacements = (typeof replacements === 'object') ? replacements : Array.prototype.slice.call(arguments, 1);
-		return str.replace(/\{\{|\}\}|\{(\w+)\}/g, function(m, n) {
-			if (m == '{{') { return '{'; }
-			if (m == '}}') { return '}'; }
-			return replacements[n];
-		});
-	};
-    replacements = (typeof replacements === 'object') ? replacements : Array.prototype.slice.call(arguments, 0);
-    return formatString(this, replacements);
+  var formatString = function(str, replacements) {
+    replacements = (typeof replacements === 'object') ? replacements : Array.prototype.slice.call(arguments, 1)
+    return str.replace(/\{\{|\}\}|\{(\w+)\}/g, function(m, n) {
+      if (m === '{{') { return '{' }
+      if (m === '}}') { return '}' }
+      return replacements[n]
+    })
+  }
+  replacements = (typeof replacements === 'object') ? replacements : Array.prototype.slice.call(arguments, 0)
+  return formatString(this, replacements)
 }
 
 export default service
